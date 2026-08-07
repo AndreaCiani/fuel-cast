@@ -134,5 +134,9 @@ and seasonal signal without needing table partitioning (see D5).
   download of the historical anagrafica.
 - **Idempotent + resumable.** Same `ON CONFLICT DO NOTHING` write path, so an
   interrupted backfill is simply re-run.
-- **Speed:** `reWriteBatchedInserts=true` on the datasource turns JDBC batches
-  into multi-row INSERTs, a large speed-up for the tens-of-millions-of-rows load.
+- **Speed:** measured ~80k rows/day-file, ~20s/file — the dominant cost is unique-
+  index maintenance on the growing fact table, not batch round-trips.
+  (`reWriteBatchedInserts` was tried and dropped: no measurable speed-up here, and
+  it makes `executeBatch` return `SUCCESS_NO_INFO`, breaking exact insert counts.)
+  The real lever for a much larger load would be range partitioning (D5), not
+  driver batch rewriting.

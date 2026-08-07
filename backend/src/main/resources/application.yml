@@ -9,11 +9,6 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fuelcast}
     username: ${SPRING_DATASOURCE_USERNAME:fuelcast}
     password: ${SPRING_DATASOURCE_PASSWORD:fuelcast}
-    hikari:
-      data-source-properties:
-        # Rewrites JDBC batch inserts into multi-row INSERTs — a large speed-up
-        # for the bulk ETL/backfill (fewer round-trips).
-        reWriteBatchedInserts: true
 
   jpa:
     hibernate:

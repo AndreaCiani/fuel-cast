@@ -43,6 +43,19 @@ curl http://localhost:8080/api/status
 latest snapshot date, how many distinct days of history are held, and the last
 ingestion run — a live view of data freshness.
 
+Consumer read API:
+
+```bash
+# Stations near a point selling a fuel, nearest first (radius/limit capped server-side)
+curl "http://localhost:8080/api/stations/nearby?lat=41.9028&lon=12.4964&fuelType=Benzina&radiusMeters=5000"
+
+# Station detail with historical percentile over a window (default 90 days)
+curl "http://localhost:8080/api/stations/14017?windowDays=90"
+
+# Distinct fuel types (for filter dropdowns)
+curl "http://localhost:8080/api/fuel-types"
+```
+
 Tests (need a Docker daemon; they spin up a real PostGIS container):
 
 ```bash
@@ -64,7 +77,7 @@ real-time.
 
 - [x] Daily idempotent ingestion + raw archive + `/api/status`
 - [x] Historical backfill from the MIMIT quarterly archive (idempotent, range-scoped)
-- [ ] Geo API: stations within radius; percentile & trend per station
+- [x] Geo API: stations within radius (PostGIS) + historical percentile per station
 - [ ] Angular PWA (Tailwind): map, search, station detail
 - [ ] Net-saving calculator, "wait or fill" signal
 - [ ] Public deploy behind Cloudflare Tunnel + automated DB backups
