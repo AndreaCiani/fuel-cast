@@ -1,6 +1,7 @@
 package com.fuelcast.station.repository;
 
 import com.fuelcast.station.dto.FuelStat;
+import com.fuelcast.station.dto.LocalTrend.TrendPoint;
 import com.fuelcast.station.dto.NearbyStation;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -108,5 +109,36 @@ public class StationQueryRepository {
     public List<String> distinctFuelTypes(LocalDate since) {
         MapSqlParameterSource p = new MapSqlParameterSource().addValue("since", since);
         return jdbc.queryForList(FUEL_TYPES, p, String.class);
+    }
+
+    private static final String LOCAL_DAILY_AVG = """
+        SELECT po.observed_at AS d,
+               avg(po.price)              AS avg_price,
+               count(DISTINCT po.station_id) AS n
+        FROM price_observation po
+        WHERE po.station_id IN (
+                SELECT s.id FROM station s
+                WHERE s.location IS NOT NULL
+                  AND ST_DWithin(s.location::geography,
+                                 ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography, :radius)
+              )
+          AND lower(po.fuel_type) = lower(:fuel)
+          AND po.is_self = :self
+          AND po.observed_at >= :since
+        GROUP BY po.observed_at
+        ORDER BY po.observed_at
+        """;
+
+    /** Daily average price across stations within the radius, for the trend signal. */
+    public List<TrendPoint> localDailyAverages(double lat, double lon, String fuel, boolean self,
+                                               int radiusMeters, LocalDate since) {
+        MapSqlParameterSource p = new MapSqlParameterSource()
+                .addValue("lat", lat).addValue("lon", lon)
+                .addValue("fuel", fuel).addValue("self", self)
+                .addValue("radius", radiusMeters).addValue("since", since);
+        return jdbc.query(LOCAL_DAILY_AVG, p, (rs, i) -> new TrendPoint(
+                rs.getObject("d", LocalDate.class),
+                rs.getBigDecimal("avg_price"),
+                rs.getInt("n")));
     }
 }

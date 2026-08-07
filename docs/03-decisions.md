@@ -163,3 +163,27 @@ library), map via **MapLibre GL** (BSD), base tiles from **OpenFreeMap**.
 **UX shape:** full-bleed map with floating control + results panels (a bottom
 sheet on mobile). The station detail shows the historical-percentile bar — the
 product's differentiator — with honest "insufficient history" states.
+
+---
+
+## D12 — Net-saving calculator & "fill up now or wait?" signal
+
+**Decision:** split the two features by where the logic belongs.
+
+- **Net-saving is client-side.** It only needs the current price and distance
+  (already in the `/nearby` payload) plus two user inputs (consumption L/100km,
+  litres). Saving vs the nearest station = `(priceNearest − price)·litres`
+  minus the detour fuel cost, where the detour is a straight-line **round trip**
+  beyond the nearest station (`2·Δdistance · consumption/100 · price`). Straight-
+  line is an honest approximation, stated in the UI; routing (OSRM) would refine
+  it later. Results can be sorted by distance or by net saving.
+
+- **The wait/fill signal is backend/time-series.** `GET /api/trend/local`
+  averages daily prices across stations within the radius over a window, and a
+  `TrendService` compares the recent 7-day mean against the preceding baseline:
+  RISING (fill now), FALLING (wait), STABLE, or INSUFFICIENT (hidden). This is
+  where the historical archive pays off; the frontend draws it as a sparkline.
+
+**Why the split:** keep the server doing the data-heavy aggregation and the
+client doing cheap per-view arithmetic that reacts instantly to the consumption
+inputs without a round trip.

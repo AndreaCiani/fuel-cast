@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { NearbyStation, StationDetail } from '../models/station.model';
+import { LocalTrend, NearbyStation, StationDetail } from '../models/station.model';
 
 /** Calls to the fuel-cast read API (/api/stations, /api/fuel-types). */
 @Injectable({ providedIn: 'root' })
@@ -34,5 +34,23 @@ export class StationService {
 
   fuelTypes(): Observable<string[]> {
     return this.http.get<string[]>('/api/fuel-types');
+  }
+
+  localTrend(opts: {
+    lat: number;
+    lon: number;
+    fuelType: string;
+    self?: boolean;
+    radiusMeters?: number;
+    days?: number;
+  }): Observable<LocalTrend> {
+    let params = new HttpParams()
+      .set('lat', opts.lat)
+      .set('lon', opts.lon)
+      .set('fuelType', opts.fuelType);
+    if (opts.self !== undefined) params = params.set('self', opts.self);
+    if (opts.radiusMeters !== undefined) params = params.set('radiusMeters', opts.radiusMeters);
+    if (opts.days !== undefined) params = params.set('days', opts.days);
+    return this.http.get<LocalTrend>('/api/trend/local', { params });
   }
 }

@@ -63,6 +63,9 @@ curl "http://localhost:8080/api/stations/14017?windowDays=90"
 
 # Distinct fuel types (for filter dropdowns)
 curl "http://localhost:8080/api/fuel-types"
+
+# Local price trend for the "fill up now or wait?" signal
+curl "http://localhost:8080/api/trend/local?lat=41.9028&lon=12.4964&fuelType=Benzina&days=60"
 ```
 
 Tests (need a Docker daemon; they spin up a real PostGIS container):
@@ -88,6 +91,6 @@ real-time.
 - [x] Historical backfill from the MIMIT quarterly archive (idempotent, range-scoped)
 - [x] Geo API: stations within radius (PostGIS) + historical percentile per station
 - [x] Angular PWA (Tailwind + MapLibre): map, radius search, station detail
-- [ ] Net-saving calculator, "wait or fill" signal
+- [x] Net-saving calculator (detour vs price diff) + "fill up now or wait?" local trend signal
 - [ ] Public deploy behind Cloudflare Tunnel + automated DB backups
 - [ ] Side B: station-manager dashboard
