@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    baseline-on-migrate: false
+
+app:
+  ingestion:
+    # No network during tests: the pipeline is driven directly with sample CSVs.
+    run-on-startup: false
+    anagrafica-url: http://localhost/none
+    prezzo-url: http://localhost/none
+    archive-dir: ${java.io.tmpdir}/fuelcast-test-archive

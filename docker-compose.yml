@@ -1,0 +1,60 @@
+# Local/dev orchestration for fuel-cast.
+# Start with:  docker compose up --build
+#
+# The database image is PostGIS (not plain Postgres) because the schema uses the
+# postgis extension and geometry columns.
+
+services:
+  # ---------------------------------------------------------------
+  # 🐘 PostgreSQL + PostGIS
+  # ---------------------------------------------------------------
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: fc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fuelcast}
+      POSTGRES_USER: ${POSTGRES_USER:-fuelcast}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fuelcast}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Exposed locally only for debugging. Do NOT expose the DB in production.
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fuelcast}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------
+  # ☕ Spring Boot backend (REST API + ETL)
+  # ---------------------------------------------------------------
+  backend:
+    build: ./backend
+    container_name: fc-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://db:5432/fuelcast}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-fuelcast}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-fuelcast}
+      APP_INGESTION_ARCHIVE_DIR: /app/data/raw
+      INGESTION_RUN_ON_STARTUP: ${INGESTION_RUN_ON_STARTUP:-true}
+    # Archived raw CSVs persist across restarts — this is the history insurance.
+    volumes:
+      - rawdata:/app/data/raw
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  pgdata:
+  rawdata:

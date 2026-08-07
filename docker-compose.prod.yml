@@ -1,0 +1,30 @@
+# Production overrides for self-hosting at home behind Cloudflare Tunnel.
+# Usage:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Key differences vs the dev file:
+#   - the database port is NOT published to the host (DB stays private);
+#   - the backend port is NOT published either — a Cloudflare Tunnel connects to
+#     it over the internal Docker network, so no inbound ports are opened on the
+#     home router and the home IP is never exposed.
+#
+# Add a real cloudflared service once the tunnel token is provisioned. See
+# docs/05-deployment.md (to be written when we wire up the public deploy).
+
+services:
+  db:
+    restart: always
+    ports: []
+
+  backend:
+    restart: always
+    ports: []
+
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: fc-tunnel
+  #   restart: always
+  #   command: tunnel run
+  #   environment:
+  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - backend

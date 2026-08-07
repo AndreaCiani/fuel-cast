@@ -1,0 +1,16 @@
+# Secrets & local env
+.env
+
+# Archived raw CSVs and other runtime data
+/data/
+backend/data/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Node (frontend, added later)
+node_modules/

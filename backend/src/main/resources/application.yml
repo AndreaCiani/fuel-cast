@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: fuelcast
+
+  datasource:
+    # Values overridable via environment variables (see .env.example).
+    # Locally without Docker you can point to localhost. The database MUST have
+    # the PostGIS extension available (use the postgis/postgis image).
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fuelcast}
+    username: ${SPRING_DATASOURCE_USERNAME:fuelcast}
+    password: ${SPRING_DATASOURCE_PASSWORD:fuelcast}
+
+  jpa:
+    hibernate:
+      # The schema is owned by Flyway; Hibernate only validates against it.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
+
+app:
+  ingestion:
+    # Daily MIMIT open-data CSVs (IODL 2.0). Pipe-separated since 2026-02-10.
+    anagrafica-url: ${MIMIT_ANAGRAFICA_URL:https://www.mimit.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv}
+    prezzo-url: ${MIMIT_PREZZO_URL:https://www.mimit.gov.it/images/exportCSV/prezzo_alle_8.csv}
+    # Raw CSVs are archived here (gzip) BEFORE parsing, so a parser bug never
+    # loses a day of history — the raw file can always be reprocessed.
+    archive-dir: ${APP_INGESTION_ARCHIVE_DIR:./data/raw}
+    # On boot, immediately pull today's snapshot so a fresh/rebooted instance
+    # is never a day behind. Disabled in tests.
+    run-on-startup: ${INGESTION_RUN_ON_STARTUP:true}
+    # MIMIT publishes in the morning (prices "as of 8am"); pull at 09:30 local.
+    daily-cron: ${INGESTION_CRON:0 30 9 * * *}
+    download-timeout-seconds: ${INGESTION_DOWNLOAD_TIMEOUT:180}
+
+server:
+  port: 8080
+  # Behind Nginx/Cloudflare, trust X-Forwarded-* so the app knows it's on HTTPS.
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

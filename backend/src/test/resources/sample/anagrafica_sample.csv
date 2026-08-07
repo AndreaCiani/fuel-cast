@@ -1,0 +1,5 @@
+Estrazione del 2026-08-05
+idImpianto|Gestore|Bandiera|Tipo Impianto|Nome Impianto|Indirizzo|Comune|Provincia|Latitudine|Longitudine
+1|Test Gestore SRL|Agip Eni|Stradale|Impianto Uno|Via Roma 1|Roma|RM|41.902800|12.496400
+2|Altro Gestore|Q8|Stradale|Impianto Due|Via Milano 2|Milano|MI|45.464200|9.190000
+3|Senza Coord|Pompe Bianche|Stradale|Impianto Tre|Via Napoli 3|Napoli|NA||
