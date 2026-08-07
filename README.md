@@ -22,7 +22,7 @@ downloads the MIMIT CSVs, archives the raw files (gzip) before parsing, and bulk
 loads them via JDBC. The raw archive plus idempotent loads make the history
 resilient to bugs, reboots and outages. Full notes in [`docs/`](docs/):
 [vision](docs/01-vision.md) · [architecture](docs/02-architecture.md) ·
-[decision log](docs/03-decisions.md).
+[decision log](docs/03-decisions.md) · [deployment](docs/05-deployment.md).
 
 ## Run locally
 

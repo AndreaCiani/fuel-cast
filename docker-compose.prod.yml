@@ -1,14 +1,15 @@
 # Production overrides for self-hosting at home behind Cloudflare Tunnel.
-# Usage:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Usage:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 #
-# Key differences vs the dev file:
-#   - the database port is NOT published to the host (DB stays private);
-#   - the backend port is NOT published either — a Cloudflare Tunnel connects to
-#     it over the internal Docker network, so no inbound ports are opened on the
-#     home router and the home IP is never exposed.
+# Differences vs the dev file:
+#   - no published host ports: the database and backend are reachable only over
+#     the internal Docker network (so the home router opens NO inbound ports and
+#     the home IP is never exposed);
+#   - a cloudflared tunnel connects outbound to Cloudflare and serves the app.
 #
-# Add a real cloudflared service once the tunnel token is provisioned. See
-# docs/05-deployment.md (to be written when we wire up the public deploy).
+# NOTE on the 5432 clash: only the dev file (docker-compose.yml) publishes 5432,
+# which would collide with a local Postgres. This prod overlay publishes nothing,
+# so there is no clash on the home machine. Full guide: docs/05-deployment.md.
 
 services:
   db:
@@ -19,18 +20,20 @@ services:
     restart: always
     ports: []
 
-  # The frontend (Nginx) is the only service the tunnel connects to; it serves
-  # the PWA and proxies /api to the backend over the internal network.
+  # Nginx is the only service the tunnel targets; it serves the PWA and proxies
+  # /api to the backend over the internal network.
   frontend:
     restart: always
     ports: []
 
-  # cloudflared:
-  #   image: cloudflare/cloudflared:latest
-  #   container_name: fc-tunnel
-  #   restart: always
-  #   command: tunnel run
-  #   environment:
-  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-  #   depends_on:
-  #     - frontend
+  # Outbound-only tunnel. The public hostname → http://frontend:80 mapping is
+  # configured in the Cloudflare Zero Trust dashboard; the token carries it.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: fc-tunnel
+    restart: always
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      - frontend
