@@ -53,6 +53,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Reading the MIMIT historical archive (quarterly .tar.gz of daily CSVs) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
+        </dependency>
+
         <!-- Database migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>

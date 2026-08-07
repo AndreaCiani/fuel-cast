@@ -25,7 +25,7 @@ import java.util.Set;
 public class PriceWriter {
 
     private static final Logger log = LoggerFactory.getLogger(PriceWriter.class);
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 2000;
 
     private static final String INSERT = """
         INSERT INTO price_observation

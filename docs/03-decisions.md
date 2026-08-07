@@ -111,3 +111,28 @@ the home IP, and provides TLS + WAF/rate-limiting on the free plan — the corre
 mitigation for exposing a home machine. The database is never published; the
 backend is reached only over the internal Docker network. Details in
 `05-deployment.md` (written when the public deploy is wired up).
+
+---
+
+## D10 — Historical backfill from the quarterly archive
+
+**Decision:** backfill history from the MIMIT quarterly `.tar.gz` archive
+(one daily CSV per file), parameterised by a quarter range and triggered as a
+one-off batch (`app.backfill.enabled=true`, never a public endpoint). Initial
+scope: **the last ~2 years** (~65M price rows) — enough for the 90-day percentile
+and seasonal signal without needing table partitioning (see D5).
+
+**Key choices, and why:**
+- **Observation date from the filename** (`prezzo_alle_8-YYYYMMDD.csv`), not the
+  CSV header — authoritative, and the archive's internal directory layout varies
+  across years.
+- **Separator auto-detected** per file: the archive mixes `;` (older) and `|`
+  (recent), matching the same parser used by the daily feed.
+- **Filter to the current station registry.** MIMIT station ids are stable, so
+  keeping only prices for currently-known stations yields exactly the history the
+  consumer product needs and drops closed-station noise — avoiding a ~5 GB
+  download of the historical anagrafica.
+- **Idempotent + resumable.** Same `ON CONFLICT DO NOTHING` write path, so an
+  interrupted backfill is simply re-run.
+- **Speed:** `reWriteBatchedInserts=true` on the datasource turns JDBC batches
+  into multi-row INSERTs, a large speed-up for the tens-of-millions-of-rows load.

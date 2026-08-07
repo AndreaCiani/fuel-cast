@@ -9,6 +9,11 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fuelcast}
     username: ${SPRING_DATASOURCE_USERNAME:fuelcast}
     password: ${SPRING_DATASOURCE_PASSWORD:fuelcast}
+    hikari:
+      data-source-properties:
+        # Rewrites JDBC batch inserts into multi-row INSERTs — a large speed-up
+        # for the bulk ETL/backfill (fewer round-trips).
+        reWriteBatchedInserts: true
 
   jpa:
     hibernate:
@@ -37,6 +42,15 @@ app:
     # MIMIT publishes in the morning (prices "as of 8am"); pull at 09:30 local.
     daily-cron: ${INGESTION_CRON:0 30 9 * * *}
     download-timeout-seconds: ${INGESTION_DOWNLOAD_TIMEOUT:180}
+
+  # One-off historical backfill from the MIMIT quarterly archive. Disabled by
+  # default; enable explicitly for a run, e.g.:
+  #   --app.backfill.enabled=true --app.backfill.from=2024-3 --app.backfill.to=2026-2
+  backfill:
+    enabled: ${BACKFILL_ENABLED:false}
+    from: ${BACKFILL_FROM:}
+    to: ${BACKFILL_TO:}
+    exit-when-done: ${BACKFILL_EXIT_WHEN_DONE:false}
 
 server:
   port: 8080

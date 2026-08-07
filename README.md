@@ -63,7 +63,7 @@ real-time.
 ## Roadmap
 
 - [x] Daily idempotent ingestion + raw archive + `/api/status`
-- [ ] Historical backfill from the MIMIT quarterly archive
+- [x] Historical backfill from the MIMIT quarterly archive (idempotent, range-scoped)
 - [ ] Geo API: stations within radius; percentile & trend per station
 - [ ] Angular PWA (Tailwind): map, search, station detail
 - [ ] Net-saving calculator, "wait or fill" signal
