@@ -19,6 +19,12 @@ services:
     restart: always
     ports: []
 
+  # The frontend (Nginx) is the only service the tunnel connects to; it serves
+  # the PWA and proxies /api to the backend over the internal network.
+  frontend:
+    restart: always
+    ports: []
+
   # cloudflared:
   #   image: cloudflare/cloudflared:latest
   #   container_name: fc-tunnel
@@ -27,4 +33,4 @@ services:
   #   environment:
   #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
   #   depends_on:
-  #     - backend
+  #     - frontend

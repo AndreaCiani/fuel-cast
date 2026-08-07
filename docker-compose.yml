@@ -55,6 +55,19 @@ services:
       retries: 5
       start_period: 60s
 
+  # ---------------------------------------------------------------
+  # 🅰️ Angular PWA (Tailwind) served by Nginx, proxying /api → backend
+  # ---------------------------------------------------------------
+  frontend:
+    build: ./frontend
+    container_name: fc-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4200:80"
+
 volumes:
   pgdata:
   rawdata:

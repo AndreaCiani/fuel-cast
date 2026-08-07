@@ -33,11 +33,20 @@ cp .env.example .env   # adjust the password
 docker compose up --build
 ```
 
-Then:
+This brings up PostGIS, the Spring backend, and the Angular PWA (Nginx). Then:
+
+- **App UI:** <http://localhost:4200>
+- **API health:** `curl http://localhost:8080/api/status`
+
+### Frontend dev
 
 ```bash
-curl http://localhost:8080/api/status
+cd frontend && npm install && npm start   # ng serve on :4200, proxies /api to :8080
 ```
+
+Angular 19 (standalone) + Tailwind + **MapLibre GL** map (OpenFreeMap tiles, no
+API key). Full-bleed map with floating search + results, and a station-detail
+panel with the historical-percentile bar. Installable PWA.
 
 `/api/status` reports how many stations and price observations are stored, the
 latest snapshot date, how many distinct days of history are held, and the last
@@ -78,7 +87,7 @@ real-time.
 - [x] Daily idempotent ingestion + raw archive + `/api/status`
 - [x] Historical backfill from the MIMIT quarterly archive (idempotent, range-scoped)
 - [x] Geo API: stations within radius (PostGIS) + historical percentile per station
-- [ ] Angular PWA (Tailwind): map, search, station detail
+- [x] Angular PWA (Tailwind + MapLibre): map, radius search, station detail
 - [ ] Net-saving calculator, "wait or fill" signal
 - [ ] Public deploy behind Cloudflare Tunnel + automated DB backups
 - [ ] Side B: station-manager dashboard

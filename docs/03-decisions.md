@@ -140,3 +140,26 @@ and seasonal signal without needing table partitioning (see D5).
   it makes `executeBatch` return `SUCCESS_NO_INFO`, breaking exact insert counts.)
   The real lever for a much larger load would be range partitioning (D5), not
   driver batch rewriting.
+
+---
+
+## D11 — Frontend: Angular 19 + Tailwind + MapLibre (PWA)
+
+**Decision:** an Angular 19 standalone PWA styled with pure Tailwind (no component
+library), map via **MapLibre GL** (BSD), base tiles from **OpenFreeMap**.
+
+**Why — consistency & constraints:**
+- Same stack shape as the author's `home-manager` (Angular standalone + pure
+  Tailwind + Nginx-served PWA), so the portfolio reads as one hand.
+- **MapLibre GL** is the permissively-licensed (BSD) fork of Mapbox GL — the right
+  open map renderer.
+- **Tiles are the one place a key/cap could sneak in.** OpenFreeMap serves vector
+  tiles with **no API key and no usage cap** (and is self-hostable later), which
+  fits the "open-source, permissive, no paid/usage-capped services" rule. The
+  style URL is a one-line swap if we ever self-host tiles.
+- No auth in phase 1: the consumer app is public, so there is no login, guard or
+  interceptor — unlike `home-manager`.
+
+**UX shape:** full-bleed map with floating control + results panels (a bottom
+sheet on mobile). The station detail shows the historical-percentile bar — the
+product's differentiator — with honest "insufficient history" states.
