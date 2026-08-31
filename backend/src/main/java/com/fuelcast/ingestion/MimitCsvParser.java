@@ -29,6 +29,8 @@ public class MimitCsvParser {
     private static final Logger log = LoggerFactory.getLogger(MimitCsvParser.class);
 
     private static final Pattern EXTRACTION_DATE = Pattern.compile("(\\d{4}-\\d{2}-\\d{2})");
+    /** Sanity cap: fuel is never ≥100 €/L, and NUMERIC(6,3) overflows at 1000. */
+    private static final BigDecimal MAX_PRICE = new BigDecimal("100");
     private static final DateTimeFormatter DT_COMU = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final ZoneId ROME = ZoneId.of("Europe/Rome");
 
@@ -90,11 +92,16 @@ public class MimitCsvParser {
             String[] f = line.split(Pattern.quote(sep), -1);
             if (f.length < 5) { malformed++; continue; }
             try {
+                BigDecimal price = new BigDecimal(f[2].trim().replace(',', '.'));
+                // Drop out-of-range garbage: no fuel is ≤0 or ≥100 €/L, and the
+                // price column is NUMERIC(6,3) — a stray ≥1000 would overflow and
+                // fail the whole batch. Skip it as malformed instead.
+                if (price.signum() <= 0 || price.compareTo(MAX_PRICE) >= 0) { malformed++; continue; }
                 out.add(new PriceRow(
                         Long.parseLong(f[0].trim()),
                         trimToNull(f[1]),
                         "1".equals(f[3].trim()),
-                        new BigDecimal(f[2].trim().replace(',', '.')),
+                        price,
                         observedAt,
                         parseCommunicatedAt(f[4])));
             } catch (RuntimeException e) {
