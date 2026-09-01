@@ -37,6 +37,7 @@ public class StationQueryRepository {
             WHERE po.station_id = s.id
               AND lower(po.fuel_type) = lower(:fuel)
               AND po.is_self = :self
+              AND po.observed_at >= :freshnessSince
             ORDER BY po.observed_at DESC
             LIMIT 1
         ) p ON true
@@ -48,11 +49,12 @@ public class StationQueryRepository {
         """;
 
     public List<NearbyStation> findNearby(double lat, double lon, String fuel, boolean self,
-                                          int radiusMeters, int limit) {
+                                          int radiusMeters, int limit, LocalDate freshnessSince) {
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("lat", lat).addValue("lon", lon)
                 .addValue("fuel", fuel).addValue("self", self)
-                .addValue("radius", radiusMeters).addValue("limit", limit);
+                .addValue("radius", radiusMeters).addValue("limit", limit)
+                .addValue("freshnessSince", freshnessSince);
         return jdbc.query(NEARBY, p, (rs, i) -> new NearbyStation(
                 rs.getLong("id"), rs.getString("nome"), rs.getString("bandiera"),
                 rs.getString("indirizzo"), rs.getString("comune"), rs.getString("provincia"),

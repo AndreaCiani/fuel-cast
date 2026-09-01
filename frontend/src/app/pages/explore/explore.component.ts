@@ -122,7 +122,9 @@ const ROME = { lat: 41.9028, lon: 12.4964 };
               >
                 <div class="min-w-0">
                   <p class="truncate text-sm font-medium text-slate-800">{{ s.nome || s.bandiera }}</p>
-                  <p class="truncate text-xs text-slate-500">{{ s.bandiera }} · {{ distance(s.distanceMeters) }}</p>
+                  <p class="truncate text-xs text-slate-500">
+                    {{ s.bandiera }} · {{ distance(s.distanceMeters) }} · agg. {{ s.observedAt | date: 'dd/MM/yy' }}
+                  </p>
                   @if (savingLabel(s); as lbl) {
                     <p class="mt-0.5 text-[11px] font-medium" [class]="savingClass(s)">{{ lbl }}</p>
                   }

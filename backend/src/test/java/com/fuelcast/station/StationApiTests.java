@@ -64,7 +64,8 @@ class StationApiTests {
 
     @Test
     void nearbyFiltersByRadiusAndOrdersByDistance() {
-        List<NearbyStation> result = queries.findNearby(41.9028, 12.4964, "Benzina", true, 5_000, 50);
+        List<NearbyStation> result =
+                queries.findNearby(41.9028, 12.4964, "Benzina", true, 5_000, 50, LocalDate.of(2023, 1, 1));
 
         // Station 3 (Milan, ~475 km) is outside the 5 km radius.
         assertThat(result).extracting(NearbyStation::id).containsExactly(1L, 2L);

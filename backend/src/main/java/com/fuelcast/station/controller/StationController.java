@@ -1,5 +1,6 @@
 package com.fuelcast.station.controller;
 
+import com.fuelcast.price.repository.PriceObservationRepository;
 import com.fuelcast.station.dto.FuelStat;
 import com.fuelcast.station.dto.NearbyStation;
 import com.fuelcast.station.dto.StationDetail;
@@ -32,13 +33,28 @@ public class StationController {
     private static final int WINDOW_DEFAULT = 90;
     private static final int WINDOW_MIN = 7;
     private static final int WINDOW_MAX = 730;
+    /** A station is "fresh" if it reported within this many days of the latest snapshot. */
+    private static final int FRESHNESS_DAYS = 14;
 
     private final StationRepository stations;
     private final StationQueryRepository queries;
+    private final PriceObservationRepository prices;
 
-    public StationController(StationRepository stations, StationQueryRepository queries) {
+    public StationController(StationRepository stations, StationQueryRepository queries,
+                             PriceObservationRepository prices) {
         this.stations = stations;
         this.queries = queries;
+        this.prices = prices;
+    }
+
+    /**
+     * Reference "now" for freshness/windows: the latest snapshot actually in the
+     * DB, not wall-clock time. Robust to ingestion gaps (weekends, or history that
+     * ends before today) — "the last 90 days" means the last 90 days of data.
+     */
+    private LocalDate referenceDate() {
+        LocalDate max = prices.findMaxObservedAt();
+        return max != null ? max : LocalDate.now();
     }
 
     @GetMapping("/nearby")
@@ -55,7 +71,8 @@ public class StationController {
         }
         int radius = clamp(radiusMeters, 100, RADIUS_MAX);
         int lim = clamp(limit, 1, LIMIT_MAX);
-        return queries.findNearby(lat, lon, fuelType.trim(), self, radius, lim);
+        LocalDate freshnessSince = referenceDate().minusDays(FRESHNESS_DAYS);
+        return queries.findNearby(lat, lon, fuelType.trim(), self, radius, lim, freshnessSince);
     }
 
     @GetMapping("/{id}")
@@ -65,7 +82,7 @@ public class StationController {
         Station s = stations.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown station " + id));
         int window = clamp(windowDays, WINDOW_MIN, WINDOW_MAX);
-        List<FuelStat> fuels = queries.findFuelStats(id, LocalDate.now().minusDays(window));
+        List<FuelStat> fuels = queries.findFuelStats(id, referenceDate().minusDays(window));
         return new StationDetail(
                 s.getId(), s.getNome(), s.getBandiera(), s.getTipoImpianto(),
                 s.getIndirizzo(), s.getComune(), s.getProvincia(),

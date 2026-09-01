@@ -1,5 +1,6 @@
 package com.fuelcast.station.controller;
 
+import com.fuelcast.price.repository.PriceObservationRepository;
 import com.fuelcast.station.TrendService;
 import com.fuelcast.station.dto.LocalTrend;
 import com.fuelcast.station.dto.LocalTrend.TrendPoint;
@@ -27,10 +28,12 @@ public class TrendController {
 
     private final StationQueryRepository queries;
     private final TrendService trend;
+    private final PriceObservationRepository prices;
 
-    public TrendController(StationQueryRepository queries, TrendService trend) {
+    public TrendController(StationQueryRepository queries, TrendService trend, PriceObservationRepository prices) {
         this.queries = queries;
         this.trend = trend;
+        this.prices = prices;
     }
 
     @GetMapping("/local")
@@ -49,8 +52,10 @@ public class TrendController {
         }
         int radius = clamp(radiusMeters, 100, RADIUS_MAX);
         int window = clamp(days, DAYS_MIN, DAYS_MAX);
+        LocalDate reference = prices.findMaxObservedAt();
+        if (reference == null) reference = LocalDate.now();
         List<TrendPoint> points =
-                queries.localDailyAverages(lat, lon, fuelType.trim(), self, radius, LocalDate.now().minusDays(window));
+                queries.localDailyAverages(lat, lon, fuelType.trim(), self, radius, reference.minusDays(window));
         return trend.build(fuelType.trim(), self, radius, window, points);
     }
 
