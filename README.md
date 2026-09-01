@@ -12,8 +12,20 @@ Two apps on one data layer:
 - **Side B — station manager** (phase 2): local ranking, competitor price
   alerts, price-leadership analysis.
 
-> Status: **backend ingestion foundation** (this milestone). The Angular
-> frontend and the geo/history API come next — see the roadmap below.
+> Status: **Side A (consumer) feature-complete** — ETL + 2-year backfill,
+> geo/history API, and the Angular PWA. Public deploy (Cloudflare Tunnel) is the
+> last step; Side B is next. See the roadmap below.
+
+## Screenshots
+
+Consumer app: map with price-coloured stations, radius search, and net-saving
+per station; station detail with the historical-percentile bar; responsive PWA.
+
+| Explore (map + search + net saving) | Station detail (historical percentile) |
+| --- | --- |
+| ![Explore](docs/screenshots/explore.png) | ![Station detail](docs/screenshots/station-detail.png) |
+
+<p align="center"><img src="docs/screenshots/mobile.png" alt="Mobile" width="300"></p>
 
 ## Architecture (short)
 

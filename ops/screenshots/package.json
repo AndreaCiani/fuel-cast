@@ -1,0 +1,12 @@
+{
+  "name": "fuelcast-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Generate README screenshots of the running app with Playwright.",
+  "scripts": {
+    "shoot": "node capture.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}
