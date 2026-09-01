@@ -53,5 +53,19 @@ await shoot('explore', { width: 1280, height: 800 });
 await shoot('station-detail', { width: 1280, height: 800, openDetail: true });
 await shoot('mobile', { width: 390, height: 844, isMobile: true });
 
+// Side B — the station-manager dashboard, via the one-click demo login.
+async function shootDashboard() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
+  const page = await ctx.newPage();
+  await page.goto(APP_URL + '/manager/login', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /gestore demo/i }).click().catch(() => {});
+  await page.getByText('POSIZIONAMENTO', { exact: false }).waitFor({ timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: resolve(OUT, 'manager-dashboard.png') });
+  console.log('wrote', resolve(OUT, 'manager-dashboard.png'));
+  await ctx.close();
+}
+await shootDashboard();
+
 await browser.close();
 console.log('done');

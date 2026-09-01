@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, computed, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { FuelMapComponent } from '../../components/fuel-map/fuel-map.component';
 import { StationDetailComponent } from '../../components/station-detail/station-detail.component';
@@ -14,7 +15,7 @@ const ROME = { lat: 41.9028, lon: 12.4964 };
 @Component({
   selector: 'app-explore',
   standalone: true,
-  imports: [CommonModule, FormsModule, FuelMapComponent, StationDetailComponent, TrendSignalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, FuelMapComponent, StationDetailComponent, TrendSignalComponent],
   template: `
     <div class="relative h-[100dvh] w-full overflow-hidden font-sans">
       <app-fuel-map
@@ -33,12 +34,15 @@ const ROME = { lat: 41.9028, lon: 12.4964 };
       >
         <!-- Controls -->
         <div class="rounded-2xl bg-white/95 p-4 shadow-xl ring-1 ring-slate-200 backdrop-blur">
-          <div class="mb-3 flex items-center gap-2">
-            <span class="text-xl">⛽</span>
-            <div>
-              <h1 class="text-base font-bold leading-none text-slate-900">fuel-cast</h1>
-              <p class="text-[11px] text-slate-500">prezzi carburanti con lo storico</p>
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">⛽</span>
+              <div>
+                <h1 class="text-base font-bold leading-none text-slate-900">fuel-cast</h1>
+                <p class="text-[11px] text-slate-500">prezzi carburanti con lo storico</p>
+              </div>
             </div>
+            <a routerLink="/manager/login" class="text-[11px] font-medium text-brand-700 hover:underline">Area gestori</a>
           </div>
 
           <div class="flex gap-2">

@@ -187,3 +187,32 @@ product's differentiator — with honest "insufficient history" states.
 **Why the split:** keep the server doing the data-heavy aggregation and the
 client doing cheap per-view arithmetic that reacts instantly to the consumption
 inputs without a round trip.
+
+---
+
+## D13 — Side B (station-manager dashboard) on the same data layer
+
+**Decision:** build Side B as new tables (`manager`, `manager_station`) that only
+reference `station` and read `price_observation` — no change to Side A, no schema
+rewrite. This was the promise of the phase-1 data model, now cashed in.
+
+**Auth:** session cookie + Spring Security + BCrypt + cookie CSRF (mirrors
+`home-manager`, D12-style). Only `/api/manager/**` and `/api/auth/me` require a
+session; **Side A stays fully public** so the consumer demo needs no login.
+
+**Station claiming:** a manager self-selects stations from the MIMIT registry —
+no ownership verification (this is a public portfolio, not a real onboarding). A
+**demo manager** is seeded (claiming a real Rome station) so recruiters can open
+the dashboard with one click.
+
+**The three features are queries over the existing history, not new pipelines:**
+- **ranking** — DISTINCT-ON latest price per station within a radius, then locate
+  the manager's price (rank, cheaper/dearer counts, local min/median/max);
+- **competitor change feed** (the in-app "alerts") — a `LAG` window over
+  `price_observation` surfacing where a neighbour's price actually moved;
+- **price movers** — per-station change counts (a proxy for price leadership).
+  Chosen over a stricter causal "who-moves-first" metric to stay honest and
+  shippable; the stricter version is a future refinement.
+
+**Alerts are in-app, not email** — a dashboard feed, no SMTP/external service
+(keeps the "no paid/usage-capped services" constraint).

@@ -12,9 +12,9 @@ Two apps on one data layer:
 - **Side B — station manager** (phase 2): local ranking, competitor price
   alerts, price-leadership analysis.
 
-> Status: **Side A (consumer) feature-complete** — ETL + 2-year backfill,
-> geo/history API, and the Angular PWA. Public deploy (Cloudflare Tunnel) is the
-> last step; Side B is next. See the roadmap below.
+> Status: **both apps built** — Side A (consumer) and Side B (station-manager
+> dashboard) on one shared data layer, with ETL + 2-year backfill. Public deploy
+> (Cloudflare Tunnel) is the last step. See the roadmap below.
 
 ## Screenshots
 
@@ -26,6 +26,11 @@ per station; station detail with the historical-percentile bar; responsive PWA.
 | ![Explore](docs/screenshots/explore.png) | ![Station detail](docs/screenshots/station-detail.png) |
 
 <p align="center"><img src="docs/screenshots/mobile.png" alt="Mobile" width="300"></p>
+
+Station-manager dashboard (Side B): local ranking, a competitor price-change
+feed, and a price-movement leaderboard — all over the same history.
+
+![Dashboard gestore](docs/screenshots/manager-dashboard.png)
 
 ## Architecture (short)
 
@@ -104,5 +109,5 @@ real-time.
 - [x] Geo API: stations within radius (PostGIS) + historical percentile per station
 - [x] Angular PWA (Tailwind + MapLibre): map, radius search, station detail
 - [x] Net-saving calculator (detour vs price diff) + "fill up now or wait?" local trend signal
+- [x] Side B: station-manager dashboard (auth, local ranking, competitor change feed, price movers)
 - [ ] Public deploy behind Cloudflare Tunnel + automated DB backups
-- [ ] Side B: station-manager dashboard
