@@ -84,7 +84,7 @@ via `rclone`.
 Schedule it with **Windows Task Scheduler** (daily, e.g. 03:00):
 
 - Action → Start a program:
-  `powershell.exe -File C:\Users\AEM15\WorkSpace\fuel-cast\ops\backup.ps1 -RcloneRemote "r2:fuelcast-backups"`
+  `powershell.exe -File C:\path\to\fuel-cast\ops\backup.ps1 -RcloneRemote "r2:fuelcast-backups"`
 
 Set up the R2 remote once with `rclone config` (S3-compatible; endpoint from the
 R2 dashboard). The raw-CSV archive volume (`rawdata`) is **not** backed up — it is
